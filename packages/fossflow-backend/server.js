@@ -16,12 +16,20 @@ const PORT = process.env.BACKEND_PORT || 3001;
 
 // Configuration from environment variables
 const STORAGE_ENABLED = process.env.ENABLE_SERVER_STORAGE === 'true';
-const STORAGE_PATH = process.env.STORAGE_PATH || '/data/diagrams';
 const ENABLE_GIT_BACKUP = process.env.ENABLE_GIT_BACKUP === 'true';
+
+let STORAGE_PATH = process.env.STORAGE_PATH || 'data/diagrams';
+// Replace ~ with home directory if path starts with ~
+if (STORAGE_PATH.startsWith('~')) {
+  STORAGE_PATH = STORAGE_PATH.replace('~', process.env.HOME || process.env.USERPROFILE);
+}
 
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+
+// Serve static files from build folder
+app.use('/fossflow', express.static(path.join(__dirname, 'build')));
 
 // Health check / Storage status endpoint
 app.get('/api/storage/status', (req, res) => {
